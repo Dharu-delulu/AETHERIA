@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cosmos 3D - Space Simulation</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Three.js & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+  <!-- 3D Canvas Viewport -->
+  <div id="canvas-container"></div>
+
+  <!-- 2D HUD Overlay -->
+  <div id="ui-layer">
+    
+    <!-- Top Header -->
+    <header class="interactive">
+      <div class="brand">
+        <div class="brand-icon">🪐</div>
+        <div>
+          <h1>Cosmos 3D</h1>
+          <span>Space Physics Simulator</span>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <select id="preset-select" class="select-scifi">
+          <option value="solar">Scenario: Solar System</option>
+          <option value="binary">Scenario: Binary Star System</option>
+          <option value="chaos">Scenario: N-Body Chaos</option>
+          <option value="comet">Scenario: Asteroid Belt & Comet</option>
+        </select>
+        <button id="btn-spawn-modal" class="btn btn-primary">➕ Add Body</button>
+        <button id="btn-tour" class="btn">🎬 Tour Mode</button>
+      </div>
+    </header>
+
+    <!-- Main Content Row -->
+    <div class="main-content-layout">
+
+      <!-- Left Telemetry Inspection Card -->
+      <div id="telemetry-panel" class="telemetry-panel interactive hidden">
+        <div class="panel-title">
+          <span>TELEMETRY DATA</span>
+          <button id="btn-close-telemetry" style="background:none; border:none; color:var(--text-muted); cursor:pointer;">✕</button>
+        </div>
+        <div id="telemetry-name" class="body-name">Earth</div>
+        
+        <div class="stat-grid">
+          <div class="stat-box">
+            <div class="stat-label">Classification</div>
+            <div id="stat-type" class="stat-value">Terrestrial</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Mass (Relative)</div>
+            <div id="stat-mass" class="stat-value">1.0 M⊕</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Velocity</div>
+            <div id="stat-velocity" class="stat-value">29.8 km/s</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Distance from Sun</div>
+            <div id="stat-distance" class="stat-value">1.0 AU</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Surface Temp</div>
+            <div id="stat-temp" class="stat-value">15 °C</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Orbital Period</div>
+            <div id="stat-period" class="stat-value">365 Days</div>
+          </div>
+        </div>
+
+        <div id="telemetry-desc" class="body-desc">
+          Earth is the third planet from the Sun and the only astronomical object known to harbor life.
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <button id="btn-focus-body" class="btn btn-primary" style="flex:1;">🔍 Focus</button>
+          <button id="btn-destroy-body" class="btn btn-danger">💥 Destroy</button>
+        </div>
+      </div>
+
+      <!-- Right Quick Settings Panel -->
+      <div class="quick-controls interactive">
+        <div class="toggle-row">
+          <span>Orbit Paths</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-orbits" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <span>Body Labels</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-labels" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <span>Grid Helper</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-grid">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <span>Ambient Sound</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-audio">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row" style="margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+          <span>N-Body Gravity</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-nbody">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Dock Bar -->
+    <footer class="interactive">
+      <div class="time-controls">
+        <button id="btn-play-pause" class="btn btn-primary">⏸ Pause</button>
+        <button id="btn-reset-time" class="btn">🔄 Reset</button>
+        <span id="sim-clock" style="font-family: monospace; color: var(--accent-cyan); font-size: 13px;">Year: 0.00</span>
+      </div>
+
+      <div class="speed-slider-wrap">
+        <span>SPEED:</span>
+        <input type="range" id="slider-speed" min="0.1" max="10" step="0.1" value="1">
+        <span id="speed-label" style="width: 40px; color: var(--text-main); font-weight: 600;">1.0x</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Modal for Creating Custom Body -->
+  <div id="modal-spawn" class="modal-overlay">
+    <div class="modal-card interactive">
+      <div class="modal-header">
+        <h2>Spawn Celestial Body</h2>
+        <button id="btn-close-modal" style="background:none; border:none; color:var(--text-muted); font-size:18px; cursor:pointer;">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label>Body Name</label>
+        <input type="text" id="input-name" value="Planet X">
+      </div>
+
+      <div class="form-group">
+        <label>Type</label>
+        <select id="input-type">
+          <option value="Terrestrial">Terrestrial Rocky Planet</option>
+          <option value="Gas Giant">Gas Giant</option>
+          <option value="Asteroid">Asteroid</option>
+          <option value="Star">Sun / Star</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Orbit Distance (AU/Scale)</label>
+        <input type="number" id="input-distance" value="120" min="20" max="600">
+      </div>
+
+      <div class="form-group">
+        <label>Radius Size</label>
+        <input type="number" id="input-radius" value="3.5" min="0.5" max="25" step="0.5">
+      </div>
+
+      <div class="form-group">
+        <label>Mass</label>
+        <input type="number" id="input-mass" value="15" min="1" max="1000">
+      </div>
+
+      <div class="form-group">
+        <label>Color</label>
+        <input type="color" id="input-color" value="#00f0ff" style="height: 38px; cursor: pointer;">
+      </div>
+
+      <div class="modal-actions">
+        <button id="btn-cancel-spawn" class="btn">Cancel</button>
+        <button id="btn-confirm-spawn" class="btn btn-primary">Launch into Orbit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic 2D Labels Container -->
+  <div id="labels-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5;"></div>
+
+  <!-- Toast Notification -->
+  <div id="toast">Notification text</div>
+
+  <!-- Custom Scripts -->
+  <script src="js/textures.js"></script>
+  <script src="js/physics.js"></script>
+  <script src="js/celestial.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
