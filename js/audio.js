@@ -1,127 +1,231 @@
 /**
- * Space Simulation - Web Audio API Sound Synthesizer
- * Generates ambient deep space soundscapes and UI audio feedback.
+ * SUPERNOVA LAB - Web Audio API Synthesizer
+ * Dynamic procedural sound engine for ambient cosmic drone, core collapse rumble,
+ * supernova shockwave detonation sound, pulsar radio pulses, and UI audio feedback.
  */
 
 class AudioEngine {
   constructor() {
     this.ctx = null;
+    this.ambientOsc1 = null;
+    this.ambientOsc2 = null;
     this.ambientGain = null;
-    this.isMuted = true;
-    this.isPlaying = false;
-    this.osc1 = null;
-    this.osc2 = null;
+    this.isEnabled = false;
   }
 
-  init() {
-    if (this.ctx) return;
-    try {
+  initContext() {
+    if (!this.ctx) {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      this.ctx = new AudioCtx();
-
-      // Master Ambient Gain
-      this.ambientGain = this.ctx.createGain();
-      this.ambientGain.gain.setValueAtTime(0.05, this.ctx.currentTime);
-      this.ambientGain.connect(this.ctx.destination);
-    } catch (e) {
-      console.warn('Web Audio API not supported in this environment.', e);
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
+      }
     }
-  }
-
-  toggleAmbient(enable) {
-    if (!this.ctx) this.init();
-    if (!this.ctx) return;
-
-    if (this.ctx.state === 'suspended') {
+    if (this.ctx && this.ctx.state === 'suspended') {
       this.ctx.resume();
     }
+  }
 
-    this.isMuted = !enable;
-
-    if (enable && !this.isPlaying) {
-      this.startSpaceDrone();
-    } else if (!enable && this.isPlaying) {
-      this.stopSpaceDrone();
+  toggleAudio(enable) {
+    this.isEnabled = enable;
+    if (enable) {
+      this.initContext();
+      this.startAmbientDrone();
+    } else {
+      this.stopAmbientDrone();
     }
   }
 
-  startSpaceDrone() {
-    if (!this.ctx) return;
+  startAmbientDrone() {
+    if (!this.ctx || !this.isEnabled || this.ambientGain) return;
 
-    // Deep sub drone
-    this.osc1 = this.ctx.createOscillator();
-    this.osc1.type = 'sine';
-    this.osc1.frequency.setValueAtTime(55, this.ctx.currentTime); // A1 note
+    try {
+      this.ambientGain = this.ctx.createGain();
+      this.ambientGain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+      this.ambientGain.connect(this.ctx.destination);
 
-    // LFO Modulation for subtle space pulsing
-    const lfo = this.ctx.createOscillator();
-    lfo.type = 'sine';
-    lfo.frequency.setValueAtTime(0.2, this.ctx.currentTime); // 0.2 Hz slow pulse
+      // Low cosmic drone 55Hz (A1)
+      this.ambientOsc1 = this.ctx.createOscillator();
+      this.ambientOsc1.type = 'sine';
+      this.ambientOsc1.frequency.setValueAtTime(55, this.ctx.currentTime);
 
-    const lfoGain = this.ctx.createGain();
-    lfoGain.gain.setValueAtTime(10, this.ctx.currentTime);
-    lfo.connect(lfoGain);
-    lfoGain.connect(this.osc1.frequency);
+      // Warm harmonic 110Hz (A2)
+      this.ambientOsc2 = this.ctx.createOscillator();
+      this.ambientOsc2.type = 'triangle';
+      this.ambientOsc2.frequency.setValueAtTime(110, this.ctx.currentTime);
 
-    // Filter
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(150, this.ctx.currentTime);
+      // LFO filter for subtle deep-space pulsing
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(200, this.ctx.currentTime);
 
-    this.osc1.connect(filter);
-    filter.connect(this.ambientGain);
+      this.ambientOsc1.connect(filter);
+      this.ambientOsc2.connect(filter);
+      filter.connect(this.ambientGain);
 
-    this.osc1.start();
-    lfo.start();
-    this.isPlaying = true;
+      this.ambientOsc1.start();
+      this.ambientOsc2.start();
+    } catch (e) {
+      console.warn('Audio start ambient failed:', e);
+    }
   }
 
-  stopSpaceDrone() {
-    if (this.osc1) {
+  stopAmbientDrone() {
+    if (this.ambientGain) {
       try {
-        this.osc1.stop();
-        this.osc1.disconnect();
+        this.ambientGain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.5);
+        setTimeout(() => {
+          if (this.ambientOsc1) this.ambientOsc1.stop();
+          if (this.ambientOsc2) this.ambientOsc2.stop();
+          this.ambientOsc1 = null;
+          this.ambientOsc2 = null;
+          this.ambientGain = null;
+        }, 500);
       } catch (e) {}
-      this.osc1 = null;
     }
-    this.isPlaying = false;
   }
 
-  playClick() {
-    if (this.isMuted || !this.ctx) return;
+  /**
+   * Sound effect for Core Collapse (Descending Sub-bass Frequency Drop)
+   */
+  playCoreCollapse() {
+    if (!this.isEnabled) return;
+    this.initContext();
+
     try {
+      const now = this.ctx.currentTime;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(800, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(400, this.ctx.currentTime + 0.05);
 
-      gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
-
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.05);
-    } catch (e) {}
-  }
-
-  playWarp() {
-    if (this.isMuted || !this.ctx) return;
-    try {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
       osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(150, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.4);
+      osc.frequency.setValueAtTime(300, now);
+      osc.frequency.exponentialRampToValueAtTime(30, now + 1.2);
 
-      gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.4);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.3);
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(400, now);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 1.3);
+    } catch (e) {}
+  }
+
+  /**
+   * Sound effect for Supernova Explosion Detonation (Impact Blast)
+   */
+  playExplosion() {
+    if (!this.isEnabled) return;
+    this.initContext();
+
+    try {
+      const now = this.ctx.currentTime;
+
+      // 1. Noise buffer for shockwave blast
+      const bufferSize = this.ctx.sampleRate * 2.0;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(800, now);
+      filter.frequency.exponentialRampToValueAtTime(40, now + 1.8);
+
+      const noiseGain = this.ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.6, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.9);
+
+      noise.connect(filter);
+      filter.connect(noiseGain);
+      noiseGain.connect(this.ctx.destination);
+
+      // 2. Sub-bass punch (40Hz pulse)
+      const subOsc = this.ctx.createOscillator();
+      const subGain = this.ctx.createGain();
+      subOsc.type = 'sine';
+      subOsc.frequency.setValueAtTime(80, now);
+      subOsc.frequency.exponentialRampToValueAtTime(20, now + 1.5);
+
+      subGain.gain.setValueAtTime(0.7, now);
+      subGain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+
+      subOsc.connect(subGain);
+      subGain.connect(this.ctx.destination);
+
+      noise.start(now);
+      subOsc.start(now);
+      subOsc.stop(now + 1.5);
+    } catch (e) {}
+  }
+
+  /**
+   * Pulsar Radio Beep Sound Effect
+   */
+  playPulsarBeep() {
+    if (!this.isEnabled) return;
+    this.initContext();
+
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, now);
+
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
 
       osc.connect(gain);
       gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.4);
+
+      osc.start(now);
+      osc.stop(now + 0.08);
     } catch (e) {}
+  }
+
+  /**
+   * UI Click Sound Effect
+   */
+  playUIClick() {
+    if (!this.isEnabled) return;
+    this.initContext();
+
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, now);
+      osc.frequency.exponentialRampToValueAtTime(1200, now + 0.04);
+
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.05);
+    } catch (e) {}
+  }
+
+  // Legacy aliases
+  playWarp() {
+    this.playExplosion();
   }
 }
+
+window.AudioEngine = AudioEngine;
