@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SUPERNOVA LAB - Explore the Real. Create the Impossible.</title>
+  <title>GALACTIC TIDAL TAIL OBSERVATORY // WebSocket GPU Engine</title>
   <link rel="stylesheet" href="css/style.css">
   <!-- Three.js & OrbitControls -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -14,456 +14,284 @@
   <!-- 3D Canvas Viewport -->
   <div id="canvas-container"></div>
 
-  <!-- 2D Sci-Fi HUD Overlay -->
+  <!-- 2D Sci-Fi Telemetry HUD Overlay -->
   <div id="ui-layer">
     
-    <!-- Top Header & Navigation -->
+    <!-- Top Header -->
     <header class="interactive">
       <div class="brand">
         <div class="brand-icon">🌌</div>
         <div>
-          <h1>SUPERNOVA LAB</h1>
-          <span class="tagline">Explore the Real. Create the Impossible. Witness the Explosion.</span>
+          <h1>GALACTIC TIDAL TAIL OBSERVATORY</h1>
+          <span class="tagline">Real-time Taichi GPU N-Body Streaming (30,000 Stellar Coordinates)</span>
         </div>
       </div>
 
-      <!-- Mode Badge Indicator -->
-      <div id="mode-badge" class="mode-badge scientific-mode">
-        <span class="mode-icon">🔬</span>
-        <span id="mode-badge-text">SCIENTIFIC MODE</span>
+      <!-- WebSocket Connection Status Badge -->
+      <div id="ws-status-badge" class="mode-badge scientific-mode">
+        <span class="mode-icon">🔴</span>
+        <span id="ws-status-text">CONNECTING (ws://localhost:8765)...</span>
       </div>
 
-      <!-- Main Navigation Tabs -->
-      <nav class="nav-tabs">
-        <button class="nav-btn active" data-tab="explore">🔭 Explore Real</button>
-        <button class="nav-btn" data-tab="create">🧪 Creative Corner</button>
-        <button class="nav-btn" data-tab="random">🎲 Prediction Game</button>
-        <button class="nav-btn" data-tab="whatif">🔬 "What If?" Lab</button>
-        <button class="nav-btn" data-tab="enrichment">🌌 Death to Creation</button>
-        <button class="nav-btn" data-tab="hrdiagram">📊 Star Inspector</button>
-      </nav>
-
-      <!-- Quick Header Action Buttons -->
       <div class="header-controls">
-        <button id="btn-toggle-audio" class="btn btn-icon" title="Toggle Sound">🔊 Sound: Off</button>
-        <button id="btn-reset-view" class="btn btn-icon" title="Reset Camera">🎥 Recenter</button>
+        <button id="btn-recenter-cam" class="btn btn-icon">🎥 Recenter View</button>
       </div>
     </header>
 
     <!-- Main Content Layout Row -->
     <div class="main-content-layout">
 
-      <!-- Left Interactive Control Panel (Dynamic Content based on active tab) -->
-      <div id="left-panel" class="control-panel interactive">
+      <!-- Left Control & Telemetry Panel -->
+      <div class="control-panel interactive" style="width: 360px;">
+        <div class="panel-header">
+          <h2>📊 N-Body Merger Telemetry</h2>
+          <span class="sub-text">Live coordinates streamed via ws://localhost:8765</span>
+        </div>
 
-        <!-- TAB 1: EXPLORE REAL SUPERNOVAE -->
-        <div id="tab-explore" class="tab-content active">
-          <div class="panel-header">
-            <h2>🔭 Explore Real Supernovae</h2>
-            <span class="sub-text">Observational astrophysics & historical supernova remnants</span>
+        <div class="stat-grid" style="margin-bottom: 14px;">
+          <div class="stat-box">
+            <div class="stat-label">Simulated Epoch</div>
+            <div id="tele-epoch" class="stat-value">T + 0.0 Myr</div>
           </div>
-
-          <div class="form-group">
-            <label>Select Real Astronomical Object</label>
-            <select id="select-real-supernova" class="select-scifi">
-              <option value="casa">Cassiopeia A (Cas A) - Type IIb Remnant</option>
-              <option value="sn1987a">SN 1987A - Blue Supergiant Core Collapse</option>
-              <option value="crab">Crab Nebula (SN 1054) - Pulsar Wind Nebula</option>
-              <option value="tycho">Tycho's Supernova (SN 1572) - Type Ia Thermonuclear</option>
-              <option value="kepler">Kepler's Supernova (SN 1604) - Historical Milky Way SN</option>
-            </select>
-          </div>
-
-          <!-- Real Object Telemetry Display -->
-          <div id="real-telemetry-card" class="info-card">
-            <h3 id="real-name">Cassiopeia A</h3>
-            <div class="badge-row">
-              <span id="real-type-badge" class="badge badge-cyan">Type IIb</span>
-              <span id="real-distance" class="badge badge-purple">11,000 ly</span>
-            </div>
-
-            <div class="stat-grid">
-              <div class="stat-box">
-                <div class="stat-label">Progenitor Star</div>
-                <div id="real-progenitor" class="stat-value">Red/Yellow Supergiant</div>
-              </div>
-              <div class="stat-box">
-                <div class="stat-label">Initial Mass</div>
-                <div id="real-mass" class="stat-value">16-25 M☉</div>
-              </div>
-              <div class="stat-box">
-                <div class="stat-label">Remnant Type</div>
-                <div id="real-remnant" class="stat-value">CCO Neutron Star</div>
-              </div>
-              <div class="stat-box">
-                <div class="stat-label">Expansion Speed</div>
-                <div id="real-speed" class="stat-value">6,000 km/s</div>
-              </div>
-            </div>
-
-            <p id="real-desc" class="card-desc">Cassiopeia A is a famous supernova remnant...</p>
-
-            <div class="telescope-telemetry">
-              <h4>📡 Multiwavelength Telescope Telemetry</h4>
-              <div id="real-telescope-notes" class="telemetry-notes">
-                <strong>Chandra X-Ray:</strong> Iron jet inversion detected.<br>
-                <strong>JWST NIRCam:</strong> "Green Monster" unshocked ejecta revealed.
-              </div>
-            </div>
-
-            <button id="btn-trigger-explosion" class="btn btn-primary btn-block" style="margin-top: 12px;">💥 Witness Supernova Transformation</button>
+          <div class="stat-box">
+            <div class="stat-label">Stellar Population</div>
+            <div id="tele-stars" class="stat-value">30,000 Stars</div>
           </div>
         </div>
 
-        <!-- TAB 2: CREATIVE CORNER (CUSTOM STAR BUILDER) -->
-        <div id="tab-create" class="tab-content">
-          <div class="panel-header">
-            <h2>🧪 Create Your Own Supernova</h2>
-            <span class="sub-text">Modify initial parameters to alter stellar destiny</span>
-          </div>
-
-          <div class="slider-group">
-            <div class="slider-header">
-              <label>Stellar Mass ($M_\odot$)</label>
-              <span id="val-mass" class="slider-val">20 M☉</span>
-            </div>
-            <input type="range" id="slider-mass" min="1" max="150" value="20" step="1">
-          </div>
-
-          <div class="slider-group">
-            <div class="slider-header">
-              <label>Surface Temperature (K)</label>
-              <span id="val-temp" class="slider-val">35,000 K</span>
-            </div>
-            <input type="range" id="slider-temp" min="3000" max="50000" value="35000" step="500">
-          </div>
-
-          <div class="slider-group">
-            <div class="slider-header">
-              <label>Rotation Speed (% breakup)</label>
-              <span id="val-rotation" class="slider-val">40%</span>
-            </div>
-            <input type="range" id="slider-rotation" min="0" max="90" value="40" step="5">
-          </div>
-
-          <div class="slider-group">
-            <div class="slider-header">
-              <label>Metallicity ($Z_\odot$ solar units)</label>
-              <span id="val-metallicity" class="slider-val">1.0 Z☉</span>
-            </div>
-            <input type="range" id="slider-metallicity" min="0.05" max="3.0" value="1.0" step="0.05">
-          </div>
-
-          <div class="toggle-row" style="margin-top: 10px;">
-            <span>Binary System Companion</span>
-            <label class="switch">
-              <input type="checkbox" id="toggle-binary">
-              <span class="slider"></span>
-            </label>
-          </div>
-
-          <div id="binary-controls" class="hidden" style="margin-top: 8px; padding-left: 10px; border-left: 2px solid var(--accent-cyan);">
-            <div class="slider-group">
-              <div class="slider-header">
-                <label>Companion Mass ($M_\odot$)</label>
-                <span id="val-companion-mass" class="slider-val">5 M☉</span>
-              </div>
-              <input type="range" id="slider-companion-mass" min="0.5" max="40" value="5" step="0.5">
-            </div>
-          </div>
-
-          <!-- Real-time Predicted Outcome Preview -->
-          <div class="info-card" style="margin-top: 14px; background: rgba(0, 240, 255, 0.05);">
-            <h4>🔮 Projected Fate</h4>
-            <div id="preview-fate-badge" class="badge badge-magenta">💥 Type II Supernova</div>
-            <div id="preview-remnant-text" style="font-size: 13px; color: var(--text-main); margin-top: 4px;">Remnant: Neutron Star (1.4 M☉)</div>
-          </div>
-
-          <button id="btn-run-simulation" class="btn btn-primary btn-block" style="margin-top: 14px;">🚀 Launch & Evolve Star</button>
+        <div class="panel-header" style="margin-top: 10px;">
+          <h2>🎛️ Dynamics Parameters</h2>
+          <span class="sub-text">Adjust collision parameters and reseed GPU simulation</span>
         </div>
 
-        <!-- TAB 3: RANDOM SUPERNOVA & PREDICTION GAME -->
-        <div id="tab-random" class="tab-content">
-          <div class="panel-header">
-            <h2>🎲 Random Supernova Generator</h2>
-            <span class="sub-text">Test your astrophysics knowledge! Predict before exploding.</span>
+        <div class="slider-group">
+          <div class="slider-header">
+            <label>Impact Velocity (km/s scaled)</label>
+            <span id="val-impact-vel" class="slider-val">0.85</span>
           </div>
-
-          <button id="btn-generate-random" class="btn btn-accent btn-block">🎲 GENERATE RANDOM STAR</button>
-
-          <div id="random-star-card" class="info-card" style="margin-top: 14px;">
-            <h3 id="rand-star-id">STAR #4821</h3>
-            <div class="stat-grid">
-              <div class="stat-box">
-                <div class="stat-label">Mass</div>
-                <div id="rand-mass" class="stat-value">31.7 M☉</div>
-              </div>
-              <div class="stat-box">
-                <div class="stat-label">Rotation</div>
-                <div id="rand-rotation" class="stat-value">82%</div>
-              </div>
-              <div class="stat-box">
-                <div class="stat-label">Metallicity</div>
-                <div id="rand-metallicity" class="stat-value">0.13 Z☉</div>
-              </div>
-              <div class="stat-box">
-                <div class="stat-label">Binary System</div>
-                <div id="rand-binary" class="stat-value">YES (8.2 M☉)</div>
-              </div>
-            </div>
-
-            <!-- Prediction Game Section -->
-            <div class="prediction-box" style="margin-top: 14px;">
-              <h4 style="color: var(--accent-amber);">What do you think will happen when it dies?</h4>
-              <div class="prediction-options">
-                <button class="pred-btn" data-choice="neutronstar">🟣 Neutron Star / Pulsar</button>
-                <button class="pred-btn" data-choice="blackhole">⚫ Black Hole</button>
-                <button class="pred-btn" data-choice="pairinstability">💥 Pair-Instability (No Remnant)</button>
-                <button class="pred-btn" data-choice="typeia">💥 Type Ia Thermonuclear</button>
-                <button class="pred-btn" data-choice="failedsn">❓ Failed Supernova</button>
-              </div>
-            </div>
-
-            <button id="btn-reveal-prediction" class="btn btn-primary btn-block disabled" style="margin-top: 14px;" disabled>💥 Run Simulation & Reveal Outcome</button>
-          </div>
+          <input type="range" id="slider-impact-vel" min="0.2" max="2.0" value="0.85" step="0.05">
         </div>
 
-        <!-- TAB 4: "WHAT IF?" EXPERIMENTATION LAB -->
-        <div id="tab-whatif" class="tab-content">
-          <div class="panel-header">
-            <h2>🔬 "What If?" Experiment Lab</h2>
-            <span class="sub-text">Change one variable → compare stellar destiny side-by-side</span>
+        <div class="slider-group">
+          <div class="slider-header">
+            <label>Disk Inclination Angle (°)</label>
+            <span id="val-angle" class="slider-val">45°</span>
           </div>
-
-          <div class="whatif-controls">
-            <p style="font-size: 12px; color: var(--text-muted);">Step 1: Set Baseline Star & Save to Slot A. Step 2: Change 1 parameter & Save to Slot B.</p>
-            
-            <div style="display: flex; gap: 8px; margin-top: 10px;">
-              <button id="btn-save-slot-a" class="btn btn-secondary" style="flex:1;">📌 Save Current to Slot A</button>
-              <button id="btn-save-slot-b" class="btn btn-secondary" style="flex:1;">📌 Save Current to Slot B</button>
-            </div>
-          </div>
-
-          <!-- Side by Side Slot Preview Card -->
-          <div class="comparison-slots" style="margin-top: 14px;">
-            <div id="slot-a-card" class="slot-card">
-              <span class="slot-badge">SLOT A (BASELINE)</span>
-              <div id="slot-a-summary" class="slot-summary">No star saved yet.</div>
-            </div>
-
-            <div id="slot-b-card" class="slot-card" style="margin-top: 8px;">
-              <span class="slot-badge slot-b-badge">SLOT B (MODIFIED)</span>
-              <div id="slot-b-summary" class="slot-summary">No star saved yet.</div>
-            </div>
-          </div>
-
-          <button id="btn-compare-whatif" class="btn btn-primary btn-block" style="margin-top: 14px;">📊 Open Full Comparative Analysis</button>
+          <input type="range" id="slider-angle" min="0" max="90" value="45" step="5">
         </div>
 
-        <!-- TAB 5: COSMIC ENRICHMENT (DEATH TO CREATION) -->
-        <div id="tab-enrichment" class="tab-content">
-          <div class="panel-header">
-            <h2>🌌 Death to Creation</h2>
-            <span class="sub-text">From Supernova Remnant to New Solar System Formation</span>
+        <div class="slider-group">
+          <div class="slider-header">
+            <label>Galactic Mass Ratio ($M_B / M_A$)</label>
+            <span id="val-mass-ratio" class="slider-val">1.0</span>
           </div>
-
-          <div class="info-card">
-            <h3>Seeding Heavy Elements (Stellar Nucleosynthesis)</h3>
-            <p class="card-desc">Supernovae are the cosmos' nuclear smelters. The heavy elements in your body (Iron in your blood, Oxygen in your lungs, Calcium in your bones) were forged inside exploding stars!</p>
-
-            <div class="stat-grid" style="margin-top: 10px;">
-              <div class="stat-box">
-                <div class="stat-label">Iron/Nickel Ejected</div>
-                <div id="yield-iron" class="stat-value">0.15 M☉</div>
-              </div>
-              <div class="stat-box">
-                <div class="stat-label">Oxygen Ejected</div>
-                <div id="yield-oxygen" class="stat-value">3.2 M☉</div>
-              </div>
-              <div class="stat-box">
-                <div class="stat-label">Silicon Ejected</div>
-                <div id="yield-silicon" class="stat-value">1.1 M☉</div>
-              </div>
-              <div class="stat-box">
-                <div class="stat-label">Gold & Platinum (r-process)</div>
-                <div id="yield-gold" class="stat-value">0.001 M☉</div>
-              </div>
-            </div>
-
-            <div class="enrichment-narrative" style="margin-top: 12px; font-size: 13px; color: var(--accent-cyan); line-height: 1.4;">
-              <strong>Cosmic Cycle:</strong> Supernova Ejecta $\rightarrow$ Interstellar Gas Cloud $\rightarrow$ Gravitational Collapse $\rightarrow$ Protostellar Disk & New Earth-like Planets.
-            </div>
-
-            <button id="btn-seed-interstellar" class="btn btn-accent btn-block" style="margin-top: 14px;">✨ Condense Cloud into New Solar System</button>
-          </div>
+          <input type="range" id="slider-mass-ratio" min="0.2" max="3.0" value="1.0" step="0.1">
         </div>
 
-        <!-- TAB 6: HR DIAGRAM & STAR INSPECTOR -->
-        <div id="tab-hrdiagram" class="tab-content">
-          <div class="panel-header">
-            <h2>📊 Hertzsprung-Russell & Core Inspector</h2>
-            <span class="sub-text">Inspect onion-skin core fusion shells and HR coordinates</span>
-          </div>
-
-          <div class="toggle-row">
-            <span>3D Core Fusion Cutaway</span>
-            <label class="switch">
-              <input type="checkbox" id="toggle-core-cutaway">
-              <span class="slider"></span>
-            </label>
-          </div>
-
-          <!-- Fusion Shell Breakdown -->
-          <div id="core-shells-list" class="shells-container" style="margin-top: 12px;">
-            <!-- Rendered dynamically -->
-          </div>
-        </div>
-
+        <button id="btn-reseed-collision" class="btn btn-primary btn-block" style="margin-top: 14px;">
+          🚀 RESEED & TRIGGER COLLISION
+        </button>
       </div>
 
-      <!-- Right Telemetry & Visual Controls Panel -->
-      <div id="right-panel" class="quick-controls interactive">
+      <!-- Right Interaction Guide Panel -->
+      <div class="quick-controls interactive" style="width: 260px;">
         <div class="panel-title">
-          <span>LIVE OBSERVATORY TELEMETRY</span>
+          <span>INTERACTION CONTROLS</span>
         </div>
-
-        <div class="telemetry-mini-grid">
-          <div class="mini-stat">
-            <span class="label">Spectral Class:</span>
-            <span id="tele-spectral" class="val">O-type Blue Giant</span>
-          </div>
-          <div class="mini-stat">
-            <span class="label">Luminosity:</span>
-            <span id="tele-lum" class="val">54,000 L☉</span>
-          </div>
-          <div class="mini-stat">
-            <span class="label">Ejecta Velocity:</span>
-            <span id="tele-vel" class="val">12,500 km/s</span>
-          </div>
-          <div class="mini-stat">
-            <span class="label">Explosion Energy:</span>
-            <span id="tele-energy" class="val">1.4 Bethes</span>
-          </div>
-        </div>
-
-        <div class="toggle-row" style="margin-top: 10px;">
-          <span>Show Ejecta Particles</span>
-          <label class="switch">
-            <input type="checkbox" id="toggle-particles" checked>
-            <span class="slider"></span>
-          </label>
-        </div>
-
-        <div class="toggle-row">
-          <span>Shockwave Wavefront</span>
-          <label class="switch">
-            <input type="checkbox" id="toggle-shockwave" checked>
-            <span class="slider"></span>
-          </label>
-        </div>
-
-        <div class="toggle-row">
-          <span>Camera Orbit Grid</span>
-          <label class="switch">
-            <input type="checkbox" id="toggle-grid">
-            <span class="slider"></span>
-          </label>
-        </div>
+        <p style="font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px;">
+          • <strong>Orbit Camera:</strong> Click and drag left mouse button.<br>
+          • <strong>Pan Camera:</strong> Right-click and drag.<br>
+          • <strong>Zoom:</strong> Scroll mouse wheel.<br>
+          • <strong>Parameters:</strong> Drag sliders and click Reseed.
+        </p>
       </div>
 
     </div>
 
-    <!-- Bottom Interactive Timeline Dock Bar -->
+    <!-- Bottom Footer Bar -->
     <footer class="interactive">
-      <div class="timeline-controls">
-        <button id="btn-play-pause" class="btn btn-primary">⏸ Pause</button>
-        <button id="btn-restart-timeline" class="btn">🔄 Replay Stage</button>
-      </div>
-
-      <!-- Timeline Scrubbing Buttons -->
-      <div class="stage-stepper">
-        <button class="stage-btn active" data-stage="0">1. Star Life</button>
-        <button class="stage-btn" data-stage="1">2. Core Fusion</button>
-        <button class="stage-btn" data-stage="2">3. Collapse</button>
-        <button class="stage-btn" data-stage="3">4. Supernova 💥</button>
-        <button class="stage-btn" data-stage="4">5. Remnant</button>
-        <button class="stage-btn" data-stage="5">6. Enrichment</button>
-      </div>
-
-      <div class="speed-slider-wrap">
-        <span>SPEED:</span>
-        <input type="range" id="slider-speed" min="0.1" max="5" step="0.1" value="1">
-        <span id="speed-label" style="width: 35px; color: var(--text-main); font-weight: 600;">1.0x</span>
+      <div style="font-size: 12px; color: var(--text-muted);">
+        Stream Protocol: <span style="color: var(--accent-cyan); font-family: monospace;">ws://localhost:8765</span> | Render Engine: Three.js WebGL
       </div>
     </footer>
 
   </div>
 
-  <!-- Prediction Result Modal -->
-  <div id="modal-prediction" class="modal-overlay">
-    <div class="modal-card interactive">
-      <div class="modal-header">
-        <h2 id="pred-modal-title">🎲 Prediction Outcome</h2>
-        <button id="btn-close-pred-modal" class="modal-close-btn">✕</button>
-      </div>
+  <!-- WebSocket & Three.js Client Pipeline -->
+  <script>
+    // -------------------------------------------------------------------------
+    // 1. THREE.JS 3D SCENE & ORBIT CONTROLS
+    // -------------------------------------------------------------------------
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, -2.2, 3.8);
 
-      <div class="modal-body" style="text-align: center;">
-        <div id="pred-result-icon" style="font-size: 54px; margin-bottom: 8px;">🎉</div>
-        <h3 id="pred-result-status" style="color: var(--accent-cyan);">CORRECT PREDICTION!</h3>
-        <p id="pred-result-text" style="color: var(--text-muted); margin-top: 8px;">Your astrophysics prediction matches the stellar collapse model outcome!</p>
+    const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    container.appendChild(renderer.domElement);
 
-        <div class="info-card" style="margin-top: 14px; text-align: left;">
-          <h4>🔬 Astrophysics Explanation</h4>
-          <p id="pred-astrophysics-exp" class="card-desc">Explosive core collapse detail...</p>
-        </div>
-      </div>
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
 
-      <div class="modal-actions">
-        <button id="btn-continue-pred" class="btn btn-primary btn-block">Continue Exploring</button>
-      </div>
-    </div>
-  </div>
+    // Ambient Lighting
+    const ambient = new THREE.AmbientLight(0x223344, 2.0);
+    scene.add(ambient);
 
-  <!-- What If Comparison Matrix Modal -->
-  <div id="modal-whatif" class="modal-overlay">
-    <div class="modal-card modal-large interactive">
-      <div class="modal-header">
-        <h2>🔬 Side-by-Side "What If?" Comparison</h2>
-        <button id="btn-close-whatif-modal" class="modal-close-btn">✕</button>
-      </div>
+    // Deep Space Starfield
+    const starfieldGeom = new THREE.BufferGeometry();
+    const starfieldPos = new Float32Array(3000 * 3);
+    for (let i = 0; i < 3000 * 3; i++) {
+      starfieldPos[i] = (Math.random() - 0.5) * 500;
+    }
+    starfieldGeom.setAttribute('position', new THREE.BufferAttribute(starfieldPos, 3));
+    const starfieldMat = new THREE.PointsMaterial({ size: 1.2, color: 0x88bbff, transparent: true, opacity: 0.6 });
+    scene.add(new THREE.Points(starfieldGeom, starfieldMat));
 
-      <div class="modal-body">
-        <div class="comparison-grid">
-          <table class="comparison-table">
-            <thead>
-              <tr>
-                <th>Property / Parameter</th>
-                <th style="color: var(--accent-cyan);">Slot A (Baseline)</th>
-                <th style="color: var(--accent-magenta);">Slot B (Modified)</th>
-                <th>Difference / Impact</th>
-              </tr>
-            </thead>
-            <tbody id="whatif-table-body">
-              <!-- Rendered dynamically -->
-            </tbody>
-          </table>
-        </div>
-      </div>
+    // 30,000 Particle Geometry
+    const NUM_STARS = 30000;
+    const particlesGeom = new THREE.BufferGeometry();
+    const positions = new Float32Array(NUM_STARS * 3);
+    const colors = new Float32Array(NUM_STARS * 3);
 
-      <div class="modal-actions">
-        <button id="btn-close-whatif" class="btn btn-primary">Close Comparison</button>
-      </div>
-    </div>
-  </div>
+    particlesGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    particlesGeom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-  <!-- Toast Notification -->
-  <div id="toast">Notification text</div>
+    const particlesMat = new THREE.PointsMaterial({
+      size: 0.015,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.9,
+      blending: THREE.AdditiveBlending
+    });
+    const particleSystem = new THREE.Points(particlesGeom, particlesMat);
+    scene.add(particleSystem);
 
-  <!-- Custom Scripts -->
-  <script src="js/astrophysics.js"></script>
-  <script src="js/supernova_data.js"></script>
-  <script src="js/textures.js"></script>
-  <script src="js/audio.js"></script>
-  <script src="js/app.js"></script>
+    // Supermassive Black Holes Meshes (SMBH A & SMBH B)
+    const smbhGeom = new THREE.SphereGeometry(0.04, 32, 32);
+    const smbhMatA = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+    const smbhMatB = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+    const smbhA = new THREE.Mesh(smbhGeom, smbhMatA);
+    const smbhB = new THREE.Mesh(smbhGeom, smbhMatB);
+    scene.add(smbhA);
+    scene.add(smbhB);
+
+    // -------------------------------------------------------------------------
+    // 2. WEBSOCKET CLIENT LINK (ws://localhost:8765)
+    // -------------------------------------------------------------------------
+    const WS_URL = 'ws://localhost:8765';
+    let socket = null;
+
+    function connectWebSocket() {
+      const badge = document.getElementById('ws-status-badge');
+      const badgeText = document.getElementById('ws-status-text');
+
+      socket = new WebSocket(WS_URL);
+
+      socket.onopen = () => {
+        badge.className = 'mode-badge scientific-mode';
+        badgeText.innerText = '🟢 ONLINE (ws://localhost:8765)';
+        console.log('[WebSocket Client] Connected to ws://localhost:8765');
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'frame') {
+            // Update Telemetry
+            document.getElementById('tele-epoch').innerText = `T + ${data.epoch} Myr`;
+            document.getElementById('tele-stars').innerText = `${data.num_stars.toLocaleString()} Stars`;
+
+            // Update Particle Positions & Colors
+            const pArray = particleSystem.geometry.attributes.position.array;
+            const cArray = particleSystem.geometry.attributes.color.array;
+
+            const recPos = data.positions;
+            const recCol = data.colors;
+
+            for (let i = 0; i < recPos.length; i++) {
+              pArray[i] = recPos[i];
+            }
+            for (let i = 0; i < recCol.length; i++) {
+              cArray[i] = recCol[i];
+            }
+
+            particleSystem.geometry.attributes.position.needsUpdate = true;
+            particleSystem.geometry.attributes.color.needsUpdate = true;
+
+            // Update SMBH positions
+            if (data.smbh && data.smbh.length >= 6) {
+              smbhA.position.set(data.smbh[0], data.smbh[1], data.smbh[2]);
+              smbhB.position.set(data.smbh[3], data.smbh[4], data.smbh[5]);
+            }
+          }
+        } catch (err) {
+          console.error('[WebSocket Parsing Error]', err);
+        }
+      };
+
+      socket.onclose = () => {
+        badge.className = 'mode-badge creative-mode';
+        badgeText.innerText = '🔴 DISCONNECTED - RECONNECTING...';
+        setTimeout(connectWebSocket, 2000);
+      };
+
+      socket.onerror = (err) => {
+        socket.close();
+      };
+    }
+
+    connectWebSocket();
+
+    // -------------------------------------------------------------------------
+    // 3. UI CONTROLS & EVENT BINDINGS
+    // -------------------------------------------------------------------------
+    const sliderImpactVel = document.getElementById('slider-impact-vel');
+    const sliderAngle = document.getElementById('slider-angle');
+    const sliderMassRatio = document.getElementById('slider-mass-ratio');
+
+    sliderImpactVel.addEventListener('input', () => {
+      document.getElementById('val-impact-vel').innerText = sliderImpactVel.value;
+    });
+    sliderAngle.addEventListener('input', () => {
+      document.getElementById('val-angle').innerText = `${sliderAngle.value}°`;
+    });
+    sliderMassRatio.addEventListener('input', () => {
+      document.getElementById('val-mass-ratio').innerText = sliderMassRatio.value;
+    });
+
+    document.getElementById('btn-reseed-collision').addEventListener('click', () => {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+          action: 'reseed',
+          impact_vel: parseFloat(sliderImpactVel.value),
+          angle: parseFloat(sliderAngle.value),
+          mass_ratio: parseFloat(sliderMassRatio.value)
+        }));
+      }
+    });
+
+    document.getElementById('btn-recenter-cam').addEventListener('click', () => {
+      camera.position.set(0, -2.2, 3.8);
+      controls.target.set(0, 0, 0);
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Animation Loop
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
 </body>
 </html>

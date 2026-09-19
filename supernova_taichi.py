@@ -2,6 +2,7 @@ import taichi as ti
 import numpy as np
 import cv2
 import mediapipe as mp
+from mediapipe.python.solutions import hands as mp_hands
 import speech_recognition as sr
 import threading
 import time
@@ -11,7 +12,7 @@ import math
 # 1. TAICHI HIGH-PERFORMANCE GPU SIMULATION ENGINE
 # -----------------------------------------------------------------------------
 # Automatically selects CUDA (NVIDIA), Metal (Apple), Vulkan, or falls back to CPU
-ti.init(arch=ti.gpu if ti.cuda.is_available() else ti.cpu)
+ti.init(arch=ti.gpu)
 
 NUM_PARTICLES = 150_000
 DT = 0.0006
@@ -203,12 +204,16 @@ class AntigravityMultimodalAgent:
     def vision_tracker_worker(self):
         """Optical tracking worker: extracts index pointer & pinch trigger."""
         cap = cv2.VideoCapture(0)
+        # Remove or comment out this line:
         mp_hands = mp.solutions.hands
+
+        # Keep this line directly:
         tracker = mp_hands.Hands(
             max_num_hands=1,
             min_detection_confidence=0.65,
             min_tracking_confidence=0.65
         )
+
 
         while self.is_alive and cap.isOpened():
             ret, frame = cap.read()
